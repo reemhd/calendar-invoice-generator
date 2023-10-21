@@ -1,0 +1,17 @@
+.env
+
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+*.egg
+.Python
+db.sqlite3
+*.sqlite
+
+secrets.yaml
+credentials.json
+
+.DS_Store

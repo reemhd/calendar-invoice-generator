@@ -1,0 +1,1 @@
+A small program to create invoices from my calendar
