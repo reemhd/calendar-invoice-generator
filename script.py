@@ -1,47 +1,43 @@
-from pyicloud import PyiCloudService
-from pyicloud.exceptions import PyiCloudFailedLoginException
-from datetime import datetime, timedelta
-import os
-from dotenv import load_dotenv
-import sys
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+from reportlab.lib import colors
 
-# Load environment variables from .env file
-load_dotenv()
+def create_invoice(file_name, dates, total, your_name, client_name, invoice_date, invoice_number, balance_due):
+    c = canvas.Canvas(file_name, pagesize=letter)
+    width, height = letter
 
-# Read username and password from environment variables
-username = os.getenv('APPLE_ID')
-password = os.getenv('APPLE_PASSWORD')
-event_title = os.getenv('EVENT_TITLE')
+    # Invoice Title
+    c.setFont("Helvetica-Bold", 16)
+    c.drawString(200, height - 50, "INVOICE")
 
-try:
-    # Authenticate
-    api = PyiCloudService(username, password)
-    if api.requires_2fa:
-        print("Two-factor authentication required.")
-        code = input("Enter the code you received: ")
-        result = api.validate_2fa_code(code)
-        print("Code validation result: %s" % result)
+    # Your Name and Details
+    c.setFont("Helvetica", 12)
+    c.drawString(30, height - 100, your_name)
+    # You can add sort code and account number here
 
-        if not result:
-            print("Failed to verify security code")
-            sys.exit(1)
+    # Client Name
+    c.drawString(30, height - 150, "To: " + client_name)
 
-except PyiCloudFailedLoginException:
-    print("Failed to log in to iCloud.")
-    exit(1)
+    # Lesson Dates
+    c.drawString(30, height - 200, "Lesson Date")
+    y_position = height - 220
+    for date in dates:
+        c.drawString(50, y_position, date)
+        y_position -= 20
 
-# Define the date range for events
-from_dt = datetime(2023, 9, 1, 0, 0, 0)
-to_dt = from_dt + timedelta(days=30)  # Next 30 days
+    # Total
+    c.drawString(400, height - 200, "Total")
+    c.drawString(450, height - 200, total)
 
-# Fetch the events
-events = api.calendar.events(from_dt, to_dt)
+    # Footer with Invoice Date, Number, and Balance Due
+    c.drawString(30, 100, "Date: " + invoice_date)
+    c.drawString(30, 80, "Invoice #: " + invoice_number)
+    c.drawString(30, 60, "Balance Due: " + balance_due)
 
-# Count the number of events with a given title
-count = 0
-for event in events:
-    if event['title'] == event_title:
-        count += 1
+    c.drawString(30, 40, "Thank you!")
 
-print(f"Number of events with title '{event_title}': {count}")
+    c.save()
 
+# Example Usage
+dates = ["02/11/2023", "08/11/2023", "12/11/2023"]  # Replace with actual dates
+create_invoice("new_invoice.pdf", dates, "301", "Reem", "Mr ", "30/11/2023", "301", "43")
